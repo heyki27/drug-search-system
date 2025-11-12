@@ -278,34 +278,3 @@ const drugList = [
      caution: '老年患者（易引发肌腱损伤）、肝肾功能不全者'
    }
  ];
- // 创建HTTP服务器
- const server = http.createServer((req, res) => {
-   // 设置响应头（允许跨域+返回JSON）
-   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-   res.setHeader('Access-Control-Allow-Origin', '*');
-   // 处理API请求：访问 /api/drugs 返回药物列表
-   if (req.url === '/api/drugs' && req.method === 'GET') {
-     res.statusCode = 200;
-     res.end(JSON.stringify({ success: true, data: drugList }));
-   } 
-   // 处理单个药物请求：比如 /api/drugs/1 返回阿司匹林
-   else if (req.url.startsWith('/api/drugs/') && req.method === 'GET') {
-     const drugId = Number(req.url.split('/')[3]);
-     const targetDrug = drugList.find(d => d.id === drugId);
-     if (targetDrug) {
-       res.statusCode = 200;
-       res.end(JSON.stringify({ success: true, data: targetDrug }));
-     } else {
-       res.statusCode = 404;
-       res.end(JSON.stringify({ success: false, message: '未找到该药物' }));
-     }
-   } 
-   // 其他路径返回404
-   else {
-     res.statusCode = 404;
-     res.end(JSON.stringify({ success: false, message: '接口不存在' }));
-   }
- });
-
-
-
