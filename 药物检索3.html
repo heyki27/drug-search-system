@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>药物禁忌症与禁用人群查询系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '微软雅黑', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #e8f4f8 0%, #f0f8fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto 0;
+            background: white;
+            border-radius: 12px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .search-box {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .search-box input {
+            width: 60%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-box input:focus {
+            border-color: #66b1ff;
+        }
+        .search-box button {
+            padding: 12px 20px;
+            background-color: #66b1ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .search-box button:hover {
+            background-color: #4096ff;
+        }
+        .result-area {
+            margin-top: 20px;
+            text-align: left;
+            padding: 15px;
+            min-height: 150px;
+            border-top: 1px dashed #eee;
+        }
+        .drug-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .drug-item:last-child {
+            border-bottom: none;
+        }
+        .drug-item h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .drug-item p {
+            font-size: 14px;
+            color: #666;
+            margin: 4px 0;
+        }
+        .drug-item span {
+            font-weight: 600;
+            color: #333;
+        }
+        .tip-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 30px;
+            line-height: 1.5;
+        }
+        .warning {
+            color: #f56c6c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>药物禁忌症与禁用人群查询</h1>
+        <div class="search-box">
+            <input type="text" id="drugInput" placeholder="请输入药物名称（如: 阿司匹林）">
+            <button onclick="searchDrug()">查询</button>
+        </div>
+        <div class="result-area" id="resultArea">
+            <!-- 查询结果会在这里显示 -->
+        </div>
+        <div class="tip-text">
+            数据来源: 国家药品监督管理局 | 医学百科<br>
+            <span class="warning"> 本系统仅作参考，不替代专业医疗建议，请在医生指导下用药</span><br>
+             2025 药物查询系统 - 课程设计项目
+        </div>
+    </div>
+
+    <script>
+        // 存储API获取的所有药物数据
+        let allDrugs = [];
+
+        // 页面加载时先获取API的药物数据
+        window.onload = function() {
+            fetch('http://localhost:3000/api/drugs')
+                .then(res => res.json())
+                .then(data => {
+                    allDrugs = data.data; // 把API数据存到变量里
+                })
+                .catch(err => {
+                    document.getElementById('resultArea').innerHTML = 
+                        '<p style="color: #f56c6c;">API加载失败，请确保药物API已启动</p>';
+                });
+        }
+
+        // 搜索药物的函数
+        function searchDrug() {
+            const inputVal = document.getElementById('drugInput').value.trim();
+            const resultArea = document.getElementById('resultArea');
+
+            // 输入为空的情况
+            if (!inputVal) {
+                resultArea.innerHTML = '<p style="color: #999;">请输入药物名称</p>';
+                return;
+            }
+
+            // 从所有药物中筛选名称包含输入内容的药物
+            const matchedDrugs = allDrugs.filter(drug => 
+                drug.name.includes(inputVal)
+            );
+
+            // 显示结果
+            if (matchedDrugs.length === 0) {
+                resultArea.innerHTML = '<p style="color: #f56c6c;">未找到该药物信息</p>';
+             } else {
+                 let html = '';
+                 matchedDrugs.forEach(drug => {
+                     html += `
+                         <div class="drug-item">
+                             <h3>${drug.name}</h3>
+                             <p><span>功效：</span>${drug.effect}</p>
+                             <p><span>禁用人群：</span>${drug.forbidden}</p>
+                             <p><span>忌用情况：</span>${drug.avoid}</p>
+                             <p><span>慎用人群：</span>${drug.caution}</p>
+                         </div>
+                     `;
+                 });
+                 resultArea.innerHTML = html;
+             }
+         }
+         // 支持按回车键查询
+         document.getElementById('drugInput').addEventListener('keydown', function(e) {
+             if (e.key === 'Enter') {
+                 searchDrug();
+             }
+         });
+     </script>
+ </body>
+ </html>
+
