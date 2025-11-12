@@ -2,6 +2,7 @@
   "version": 2,
   "builds": [
     { "src": "drug-api.js", "use": "@vercel/node" }
+    { "src": "/药物检索3.html", "use": "@vercel/static" }
   ],
   "routes": [
     { 
